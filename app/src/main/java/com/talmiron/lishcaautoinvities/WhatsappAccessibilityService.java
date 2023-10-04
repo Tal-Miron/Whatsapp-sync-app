@@ -1,6 +1,8 @@
 package com.talmiron.lishcaautoinvities;
 
 import android.accessibilityservice.AccessibilityService;
+import android.content.Intent;
+import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -10,8 +12,23 @@ import java.util.List;
 
 public class WhatsappAccessibilityService extends AccessibilityService {
 
+
+    @Override
+    protected void onServiceConnected() {
+        super.onServiceConnected();
+        Log.d("myTag", "onServiceConnected");
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Log.d("myTag", "OnCreate");
+    }
+
     @Override
     public void onAccessibilityEvent (AccessibilityEvent event) {
+
+        Log.d("myTag", "onAccessibilityEvent");
         if (getRootInActiveWindow () == null) {
             return;
         }
@@ -59,6 +76,12 @@ public class WhatsappAccessibilityService extends AccessibilityService {
 
     @Override
     public void onInterrupt() {
+        Log.d("myTag", "onInterrupt");
+    }
 
+    @Override
+    public boolean onUnbind(Intent intent) {
+        Log.d("myTag", "onUnbind");
+        return super.onUnbind(intent);
     }
 }

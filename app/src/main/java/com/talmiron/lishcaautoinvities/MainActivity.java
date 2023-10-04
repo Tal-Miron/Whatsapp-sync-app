@@ -1,6 +1,7 @@
 package com.talmiron.lishcaautoinvities;
 
 import android.accessibilityservice.AccessibilityService;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -11,7 +12,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Message;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
+
+import com.google.android.gms.common.moduleinstall.ModuleInstall;
+import com.google.android.gms.common.moduleinstall.ModuleInstallRequest;
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanner;
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning;
 import com.talmiron.lishcaautoinvities.databinding.ActivityMainBinding;
@@ -29,11 +34,12 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private ActivityMainBinding binding;
-    Button btn;
+    Button btn, startBtn;
     TextView tvResult;
     GmsBarcodeScanner scanner;
     String rawValue;
 
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,14 +48,39 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(binding.getRoot());
         btn = findViewById(R.id.send);
         btn.setOnClickListener(this);
+        startBtn = findViewById(R.id.startAccessability);
+        startBtn.setOnClickListener(this);
         tvResult = findViewById(R.id.tvResult);
-
         scanner = GmsBarcodeScanning.getClient(this);
+        Log.d("myTag", "This is a Test");
 
-        if (!isAccessibilityOn (this, WhatsappAccessibilityService.class)) {
+        if (!isAccessibilityOn (this, WhatsappAccessibilityService.class, tvResult)) {
             Intent intent = new Intent (Settings.ACTION_ACCESSIBILITY_SETTINGS);
             this.startActivity (intent);
+            WhatsappAccessibilityService was = new WhatsappAccessibilityService();
+            tvResult.setText("isAccessibilityON");
         }
+
+
+        com.google.android.gms.common.moduleinstall.ModuleInstallClient moduleInstall = ModuleInstall.getClient(this);
+        Log.d("myTag", "Starting installation");
+        ModuleInstallRequest moduleInstallRequest = ModuleInstallRequest.newBuilder()
+                .addApi(GmsBarcodeScanning.getClient(this))
+                .build();
+        moduleInstall
+                .installModules(moduleInstallRequest)
+                .addOnSuccessListener(
+                        response -> {
+                            if (response.areModulesAlreadyInstalled()) {
+                                tvResult.setText("GMS ARE INSTALLED");
+                                Log.d("myTag", "GMS ARE INSTALLED");
+                            }
+                        })
+                .addOnFailureListener(
+                        e -> {
+                            tvResult.setText("FAILED : GMS ARE -NOT- INSTALLED");
+                            Log.d("myTag", "FAILED : GMS ARE -NOT- INSTALLED");
+                        });
     }
 
 
@@ -108,6 +139,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View view) {
+
+        if(view== startBtn){
+            if (!isAccessibilityOn (this, WhatsappAccessibilityService.class, tvResult)) {
+                Intent intent = new Intent (Settings.ACTION_ACCESSIBILITY_SETTINGS);
+                this.startActivity (intent);
+                WhatsappAccessibilityService was = new WhatsappAccessibilityService();
+                tvResult.setText("isAccessibilityON FROM BTN");
+            }
+        }
+
         if (view == btn)
         {
             // Example JSON
@@ -151,12 +192,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     .addOnFailureListener(
                             e -> {
                                 // Task failed with an exception
-                                tvResult.setText("Failed");
+                                tvResult.setText("Failed: " +e.getMessage());
                             });
         }
     }
 
-    private boolean isAccessibilityOn (Context context, Class<? extends AccessibilityService> clazz) {
+    private boolean isAccessibilityOn (Context context, Class<? extends AccessibilityService> clazz, TextView tvResult) {
         int accessibilityEnabled = 0;
         final String service = context.getPackageName () + "/" + clazz.getCanonicalName ();
         try {
@@ -166,6 +207,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         TextUtils.SimpleStringSplitter colonSplitter = new TextUtils.SimpleStringSplitter (':');
 
         if (accessibilityEnabled == 1) {
+            tvResult.setText("AccesabilityEnabled");
             String settingValue = Settings.Secure.getString (context.getApplicationContext ().getContentResolver (), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
             if (settingValue != null) {
                 colonSplitter.setString (settingValue);
@@ -178,7 +220,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }
         }
-
+        if(tvResult.getText() == "AccesabilityEnabled"){
+            tvResult.setText("IsAccessabilityOff And AccesabilityEnabled");
+        }
+        else {
+            tvResult.setText("IsAccessabilityOff");
+        }
         return false;
     }
 }
