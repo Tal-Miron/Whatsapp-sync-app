@@ -1,6 +1,7 @@
 package com.talmiron.lishcaautoinvities;
 
 import android.accessibilityservice.AccessibilityService;
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Intent;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
@@ -16,6 +17,11 @@ public class WhatsappAccessibilityService extends AccessibilityService {
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
+
+        AccessibilityServiceInfo info = this.getServiceInfo();
+        info.eventTypes = AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED;
+        info.flags = AccessibilityServiceInfo.DEFAULT;
+        this.setServiceInfo(info);
         Log.d("myTag", "onServiceConnected");
     }
 
@@ -37,7 +43,7 @@ public class WhatsappAccessibilityService extends AccessibilityService {
 
 
         // Whatsapp Message EditText id
-        List<AccessibilityNodeInfoCompat> messageNodeList = rootInActiveWindow.findAccessibilityNodeInfosByViewId("com.whatsapp:id/entry");
+        List<AccessibilityNodeInfoCompat> messageNodeList = rootInActiveWindow.findAccessibilityNodeInfosByViewId("com.whatsapp.w4b:id/entry");
         if (messageNodeList == null || messageNodeList.isEmpty()) {
             return;
         }
@@ -50,7 +56,7 @@ public class WhatsappAccessibilityService extends AccessibilityService {
         }
 
         // Whatsapp send button id
-        List<AccessibilityNodeInfoCompat> sendMessageNodeInfoList = rootInActiveWindow.findAccessibilityNodeInfosByViewId("com.whatsapp:id/send");
+        List<AccessibilityNodeInfoCompat> sendMessageNodeInfoList = rootInActiveWindow.findAccessibilityNodeInfosByViewId("com.whatsapp.w4b:id/send");
         if (sendMessageNodeInfoList == null || sendMessageNodeInfoList.isEmpty()) {
             return;
         }

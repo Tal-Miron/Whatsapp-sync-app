@@ -25,6 +25,12 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -90,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         startActivity(i);
     }
 
-    public String MessageBuilder(JSONObject message) throws Exception{
+ /*   public String MessageBuilder(JSONObject message) throws Exception{
         String phone = message.getString("P"); // Better than has since also checks type.
         StringBuilder msg = new StringBuilder();
         switch (message.getInt("K")){ // Message Kind: 0 - New, 1 - Update, 2 - Canceled
@@ -135,7 +141,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
         }
         return msg.toString();
-    }
+    } */
 
     @Override
     public void onClick(View view) {
@@ -171,18 +177,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 // Task completed successfully
                                 rawValue = barcode.getRawValue();
                                 try {
-                                    JSONObject jsonResponse = new JSONObject(rawValue);
-                                    JSONArray messages = jsonResponse.getJSONArray("m"); // messages
-                                    for(int i=0;i<messages.length();i++){
-                                        JSONObject msgJson = messages.getJSONObject(i);
-                                        String message = MessageBuilder(msgJson);
-                                        sendMessage(msgJson.getString("P"), message);
-                                        tvResult.setText(rawValue);
+                                    tvResult.setText(rawValue);
+                                    Result result = extractInfo(rawValue);
+                                    for (String number:
+                                         result.getPhoneNumbers()) {
+                                        sendMessage(number, result.getMessageText());
                                     }
-                                } catch (Exception e) { // Failed. Save failed to list and show to the user later on
+                                }
+                                catch (Exception e) { // Failed. Save failed to list and show to the user later on
                                     tvResult.setText(e.toString());
                                 }
-
                             })
                     .addOnCanceledListener(
                             () -> {
@@ -228,4 +232,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         return false;
     }
+
+    static Result extractInfo(String qrData) {
+        List<String> phoneNumbers = new ArrayList<>();
+
+        String pattern = "<<(\\d+(?:,\\d+)*)>>"; // Updated pattern to match any number of digits separated by commas
+        Pattern regex = Pattern.compile(pattern);
+        Matcher matcher = regex.matcher(qrData);
+
+        while (matcher.find()) {
+            String numbersInside = matcher.group(1);
+            String[] numbersArray = numbersInside.split(",");
+
+            for (String number : numbersArray) {
+                phoneNumbers.add(number);
+            }
+        }
+
+        // Remove all occurrences of << >> and everything inside
+        String cleanedText = regex.matcher(qrData).replaceAll("").trim();
+
+        return new Result(phoneNumbers, cleanedText);
+    }
+
 }
