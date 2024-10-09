@@ -3,6 +3,8 @@ package com.talmiron.lishcaautoinvities;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Debug;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -13,11 +15,11 @@ import java.util.List;
 
 public class WhatsappAccessibilityService extends AccessibilityService {
 
-
+    String Signature;
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
-
+        Signature = "\n\n" + "לשכה" ;
         AccessibilityServiceInfo info = this.getServiceInfo();
         info.eventTypes = AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED;
         info.flags = AccessibilityServiceInfo.DEFAULT;
@@ -34,7 +36,7 @@ public class WhatsappAccessibilityService extends AccessibilityService {
     @Override
     public void onAccessibilityEvent (AccessibilityEvent event) {
 
-        Log.d("myTag", "onAccessibilityEvent");
+        Log.d("TagEvent", "onAccessibilityEvent");
         if (getRootInActiveWindow () == null) {
             return;
         }
@@ -50,22 +52,33 @@ public class WhatsappAccessibilityService extends AccessibilityService {
 
         // check if the whatsapp message EditText field is filled with text and ending with your suffix (explanation above)
         AccessibilityNodeInfoCompat messageField = messageNodeList.get(0);
+        SharedPreferences sharedPref = getSharedPreferences("signature", MODE_PRIVATE);
+        Signature = "\n\n" + sharedPref.getString("signature", "לשכה");
+        Log.d("myTag", "signature is: '"+Signature+"'");
         if (messageField.getText() == null || messageField.getText().length() == 0
-                || !messageField.getText().toString().endsWith("\n\nלשכת ענף אד״ם")) { // So your service doesn't process any message, but the ones ending your apps suffix
+                || !messageField.getText().toString().contains((Signature))) { // So your service doesn't process any message, but the ones ending your apps suffix
+//            Log.d("myTag", "not msg");
+//            if (messageField.getText() == null)
+//                Log.d("myTag", "msg field is null");
+//            else
+//                Log.d("myTag", "field is: "+messageField.getText().toString());
             return;
         }
 
         // Whatsapp send button id
         List<AccessibilityNodeInfoCompat> sendMessageNodeInfoList = rootInActiveWindow.findAccessibilityNodeInfosByViewId("com.whatsapp.w4b:id/send");
         if (sendMessageNodeInfoList == null || sendMessageNodeInfoList.isEmpty()) {
+//            Log.d("myTag", "no send btn");
             return;
         }
 
         AccessibilityNodeInfoCompat sendMessageButton = sendMessageNodeInfoList.get(0);
         if (!sendMessageButton.isVisibleToUser()) {
+//            Log.d("myTag", "send btn not visible");
             return;
         }
 
+//        Log.d("myTag", "Fireee!!!");
         // Now fire a click on the send button
         sendMessageButton.performAction(AccessibilityNodeInfo.ACTION_CLICK);
 

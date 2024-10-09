@@ -2,30 +2,49 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/idficeapplogovtwo"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/idficeapplogoround"
         android:supportsRtl="true"
         android:theme="@style/Theme.LishcaAutoInvities"
         tools:targetApi="31">
+        <activity
+            android:name=".HistoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SendMsgActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ManageMessage"
+            android:exported="false"
+            android:label="@string/title_activity_manage_message"
+            android:theme="@style/Theme.LishcaAutoInvities" />
+        <activity
+            android:name=".ChooseActivity"
+            android:label="@string/title_choose_activity" />
 
         <service
-            android:name="WhatsappAccessibilityService"
-            android:label="Accessibility Service"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
-            android:exported="true">
+            android:name=".WhatsappAccessibilityService"
+            android:exported="true"
+            android:label="Lishca Service"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <meta-data
                 android:name="android.accessibilityservice"
-                android:resource="@xml/whatsapp_service"/>
+                android:resource="@xml/whatsapp_service" />
+
             <intent-filter>
-                <action android:name="android.accessibilityservice.AccessibilityService"/>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
         </service>
-
 
         <activity
             android:name=".MainActivity"
@@ -42,7 +61,6 @@
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
-
     </application>
 
 </manifest>
