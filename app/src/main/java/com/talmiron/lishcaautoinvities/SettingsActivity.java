@@ -17,7 +17,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
     TextView TVAmount;
     Switch WBSwitch;
     Button SaveAndCloseBtn;
-    SharedPreferences sharedPrefSignature,sharedPrefAmt;
+    SharedPreferences sharedPrefSignature,sharedPrefAmt, sharedPrefWB;
     SeekBar SBSize;
 
     @Override
@@ -26,6 +26,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         setContentView(R.layout.activity_settings);
         sharedPrefSignature = getSharedPreferences("signature", MODE_PRIVATE);
         sharedPrefAmt = getSharedPreferences("saveamt", MODE_PRIVATE);
+        sharedPrefWB = getSharedPreferences("usewb", MODE_PRIVATE);
         InitViews();
     }
 
@@ -33,6 +34,8 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         SignatureET = findViewById(R.id.editTextSignature);
         SignatureET.setText(sharedPrefSignature.getString("signature", "לשכת..."));
         WBSwitch = findViewById(R.id.WBSwitch);
+        WBSwitch.setOnClickListener(this);
+        WBSwitch.setChecked(sharedPrefWB.getBoolean("usewb", false));
         SBSize = findViewById(R.id.seekBar);
         SBSize.setOnSeekBarChangeListener(this);
         TVAmount = findViewById(R.id.textViewAmount);
@@ -46,8 +49,16 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
 
     @Override
     public void onClick(View v) {
+        String WHATSAPP_BUSINESS_PACKAGE_NAME = "com.whatsapp.w4b";
+
         int amtNum = Integer.parseInt(TVAmount.getText().toString());
         int rowCnt = SqlManager.getRowCount();
+        /*if (v == WBSwitch && WBSwitch.isChecked()){
+            context
+            // if whatsapp business is installed
+            if (isAppInstalled(WHATSAPP_BUSINESS_PACKAGE_NAME, this)) {
+                shareTextOnWhatsappBusiness(shareText);
+        }*/
         if (v == SaveAndCloseBtn){
             sharedPrefSignature.edit().putString("signature", SignatureET.getText().toString()).apply();
             sharedPrefAmt.edit().putInt("saveamt", amtNum).apply();

@@ -4,9 +4,13 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+
+import java.util.List;
 
 public class SendMsgActivity extends AppCompatActivity {
 
@@ -41,14 +45,69 @@ public class SendMsgActivity extends AppCompatActivity {
 
     }
 
-
+/*
     public void sendMessage(String phoneNumber, String message){
         Intent whatsappIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://api.whatsapp.com/send?phone=+972"+ phoneNumber +
                 "&text="+ message + Signature));
         Log.d("myTag", phoneNumber);
         counter++;
         startActivityForResult(whatsappIntent,69858);
+    }*/
+/*
+
+    public void sendMessage(String phoneNumber, String message) {
+        PackageManager packageManager = getPackageManager();
+        Intent whatsappIntent;
+        boolean isWhatsappBusinessInstalled = false;
+
+        List<PackageInfo> packages = packageManager.getInstalledPackages(PackageManager.GET_ACTIVITIES);
+        for (PackageInfo packageInfo : packages) {
+            if (packageInfo.packageName.equals("com.whatsapp.w4b")) {
+                isWhatsappBusinessInstalled = true;
+                break;
+            }
+        }
+
+        if (isWhatsappBusinessInstalled) {
+            whatsappIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://api.whatsapp.com/send?phone=+972" + phoneNumber + "&text=" + message + Signature));
+            whatsappIntent.setPackage("com.whatsapp.w4b");
+        } else {
+            whatsappIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://api.whatsapp.com/send?phone=+972" + phoneNumber + "&text=" + message + Signature));
+            whatsappIntent.setPackage("com.whatsapp");
+        }
+
+        Log.d("myTag", phoneNumber);
+        counter++;
+        startActivityForResult(whatsappIntent, 69858);
     }
+
+*/
+public void sendMessage(String phoneNumber, String message) {
+    PackageManager packageManager = getPackageManager();
+    Intent whatsappIntent;
+    boolean isWhatsappBusinessInstalled = false;
+
+    // Check if WhatsApp Business is installed
+    try {
+        packageManager.getPackageInfo("com.whatsapp.w4b", PackageManager.GET_META_DATA);
+        isWhatsappBusinessInstalled = true;
+    } catch (PackageManager.NameNotFoundException e) {
+        // WhatsApp Business is not installed
+    }
+
+    if (isWhatsappBusinessInstalled) {
+        whatsappIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://api.whatsapp.com/send?phone=+972" + phoneNumber + "&text=" + message + Signature));
+        whatsappIntent.setPackage("com.whatsapp.w4b");
+    } else {
+        whatsappIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://api.whatsapp.com/send?phone=+972" + phoneNumber + "&text=" + message + Signature));
+        whatsappIntent.setPackage("com.whatsapp");
+    }
+
+    Log.d("myTag", phoneNumber);
+    counter++;
+    startActivityForResult(whatsappIntent, 69858);
+}
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
