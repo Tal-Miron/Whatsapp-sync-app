@@ -1,5 +1,5 @@
 # LishcaAutoInvites
- Whatsapp automation via JSON received with QR Code
+ Watsapp automation via JSON received with QR Code
 
 Usage:
 1. Open the app.
